@@ -13,6 +13,9 @@ app.use(cors());
 
 app.use("/api/users", rutasUsuario);
 
+// Endpoint donde al ingresar nos mostrara ue funciona correctamente nuestra api
+app.get("/", (req, res)=> res.json({message: "Hola mundo"}));
+
 // Conexión a la base de datos
 mongoose.connect("mongodb://localhost:27017")
 .then(()=>{
