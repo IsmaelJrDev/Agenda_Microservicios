@@ -11,7 +11,7 @@ app.use(express.json()); // Middleware para parsear el cuerpo de las solicitudes
 
 app.use("/api/contacts", contactsRoutes); // Usamos las rutas de contactos
 
-// Conexión a la base de datos
+// Conexión a la base de datos 
 mongoose.connect("mongodb://localhost:27017")
 .then(()=>{
     app.listen(3001,()=>console.log("Servidor 2 corriendo"));
