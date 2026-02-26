@@ -5,3 +5,43 @@ services:
       - "27017:27017"
     volumes:
       - ./mongo:/data/db
+
+#     ORQUESTACION DE CONTENEDORES
+
+  # Declaración del microservicio 1 tal cual como lo pusimos en nginx.conf
+  microservicio_1:
+    image: node:18
+    container_name: microservicio_1   # Nombre del contenedor para el microservicio 1
+    working_dir: /app # Establece el directorio de trabajo dentro del contenedor
+    volumes:
+      - ./microservicio_1:/app  # Monta el directorio del microservicio 1 en el contenedor un tipo enlazado
+    command: sh -c "npm install && npm start" # Comando para instalar dependencias y arrancar el microservicio 1
+    depends_on:
+      - mongodb # Asegura que el microservicio 1 se inicie después de que MongoDB esté listo es decir depende de MongoDB
+    expose:
+      - "3000" # Expone el puerto 3000 para el microservicio 1, pero ya no en la computadora, sino solo dentro de la red de Docker, importante para nginx
+
+  microservicio_2:
+    image: node:18
+    container_name: microservicio_2   # Nombre del contenedor para el microservicio 2
+    working_dir: /app # Establece el directorio de trabajo dentro del contenedor
+    volumes:
+      - ./microservicio_2:/app  # Monta el directorio del microservicio 2 en el contenedor un tipo enlazado
+    command: sh -c "npm install && npm start" # Comando para instalar dependencias y arrancar el microservicio 2
+    depends_on:
+      - mongodb # Asegura que el microservicio 2 se inicie después de que MongoDB esté listo es decir depende de MongoDB
+      - microservicio_1 # Asegura que el microservicio 2 se inicie después de que el microservicio 1 esté listo es decir depende del microservicio 1
+    expose:
+      - "3000" # Expone el puerto 3000 para el microservicio 2, pero ya no en la computadora, sino solo dentro de la red de Docker, importante para nginx
+
+
+  # Contenedor de nginx que se encargará de enrutar las peticiones a los microservicios
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80" # Mapea el puerto 80 del contenedor al puerto 80 de la computadora, para que podamos acceder a nginx desde el navegador
+    volumes: 
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro  # Monta el archivo de configuración de nginx en el contenedor, para que nginx pueda enrutar las peticiones a los microservicios, con el ro para que no cargue la configuracion precargada de nginx y use la nuestra
+    depends_on:
+      - microservicio_1 # Asegura que nginx se inicie después de que el microservicio 1 esté listo es decir depende del microservicio 1
+      - microservicio_2 # Asegura que nginx se inicie después de que el microservicio 2 esté listo es decir depende del microservicio 2

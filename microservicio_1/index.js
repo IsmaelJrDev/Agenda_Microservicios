@@ -17,7 +17,7 @@ app.use("/api/users", rutasUsuario);
 app.get("/", (req, res)=> res.json({message: "Hola mundo"}));
 
 // Conexión a la base de datos
-mongoose.connect("mongodb://localhost:27017")
+mongoose.connect("mongodb://mongodb:27017")
 .then(()=>{
     app.listen(3000,()=>console.log("Servidor corriendo"));
 }).catch((err)=>{
