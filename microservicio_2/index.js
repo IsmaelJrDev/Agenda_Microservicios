@@ -14,7 +14,7 @@ app.use("/api/contacts", contactsRoutes); // Usamos las rutas de contactos
 // Conexión a la base de datos 
 mongoose.connect("mongodb://mongodb:27017")
 .then(()=>{
-    app.listen(3000,()=>console.log("Servidor 2 corriendo"));
+    app.listen(3000,"0.0.0.0",()=>console.log("Servidor 2 corriendo"));
 }).catch((err)=>{
     console.log("El servidor 2 no jala :(" + err);
 });

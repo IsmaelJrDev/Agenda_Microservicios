@@ -19,7 +19,7 @@ app.get("/", (req, res)=> res.json({message: "Hola mundo"}));
 // Conexión a la base de datos
 mongoose.connect("mongodb://mongodb:27017")
 .then(()=>{
-    app.listen(3000,()=>console.log("Servidor corriendo"));
+    app.listen(3000,"0.0.0.0",()=>console.log("Servidor corriendo"));
 }).catch((err)=>{
     console.log("El servidor no jala :)" + err);
 });
