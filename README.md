@@ -6,10 +6,25 @@ Backend del sistema creado en la materia de Sistemas Distribuidos en el 8vo seme
 ## Stack Tecnológico
 
 - **Base de datos:** MongoDB
-- ****
+- **Microservicios:** Docker
+- **Lenguaje:** JavaScript
+- **Backend:** Node.js
+
+## Herramientas de desarrollo
+
+- **Visual Studio Code**
+- **Postman**
+- **Linux**
+- **Docker**
 
 ## División de microservicios
 
 ### Microservicio_1
 
 En este microservicio se realiza la parte de logueo, usando `bycrypt`  para poder tener una mejor seguridad con el hasheo de contraseñas, ademas de usar `jwt` para poder crear un token de logueo.
+
+### Microservicio_2
+
+En este, una vez ya logueados vamos a poder crear, eliminar, modificar y obtener contactos por medio de la api que se creo, es decir un tipo CRUD. Esto lo podemos proar hacieno uso de **Postman** pasandole el token de logueo por la parte de header
+
+## Diagrama de Arquitectura del sistema

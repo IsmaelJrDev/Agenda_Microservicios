@@ -1,3 +1,7 @@
-mongo/
+# CArpeta de las bases de datos
+mongo1/
+mongo2/
+
+# Carpetas de los microservicios
 microservicio_1/node_modules
 microservicio_2/node_modules
