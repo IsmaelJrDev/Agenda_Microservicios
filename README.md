@@ -27,4 +27,10 @@ En este microservicio se realiza la parte de logueo, usando `bycrypt`  para pode
 
 En este, una vez ya logueados vamos a poder crear, eliminar, modificar y obtener contactos por medio de la api que se creo, es decir un tipo CRUD. Esto lo podemos proar hacieno uso de **Postman** pasandole el token de logueo por la parte de header
 
+## API Gateway
+
+Estamos haciendo uso de **Ngnix** para crear la API Gateway, todas estas configuraciones se encuentran en el archivo de ```nginx.conf``` dentro de la carpeta de **nginx**
+
 ## Diagrama de Arquitectura del sistema
+
+![Diagram](assets/Arquitectura.svg)
