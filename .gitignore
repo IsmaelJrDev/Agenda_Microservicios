@@ -1,7 +1,15 @@
 # CArpeta de las bases de datos
 mongo1/
 mongo2/
+mongo3/
+mongo4/
+mongo5/
+mongo6/
 
 # Carpetas de los microservicios
 microservicio_1/node_modules
 microservicio_2/node_modules
+
+# Archivos de configuracion de KeyFile
+cluster/mongo-keyfile
+cluster/mongo-Keyfile

@@ -1,0 +1,57 @@
+services:
+  # configuración para el primer cluster para el microservicio 1
+  mongoUno:
+    image: mongo
+    container_name: mongoUno
+    command: mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile
+    volumes:
+      - ./mongo1:/data/db:z
+      - ./mongo-keyfile:/etc/mongo-keyfile:z
+    ports:
+      - "27017:27017"
+  mongoDos:
+    image: mongo
+    container_name: mongoDos
+    command: mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile
+    volumes:
+      - ./mongo2:/data/db:z
+      - ./mongo-keyfile:/etc/mongo-keyfile:z
+    ports:
+      - "27018:27017"
+  mongoTres:
+    image: mongo
+    container_name: mongoTres
+    command: mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile
+    volumes:
+      - ./mongo3:/data/db:z
+      - ./mongo-keyfile:/etc/mongo-keyfile:z
+    ports:
+      - "27019:27017"
+  # configuración para el segundo cluster para el microservicio 2
+  mongoCuatro:
+    image: mongo
+    container_name: mongoCuatro
+    command: mongod --replSet rs1 --bind_ip_all --keyFile /etc/mongo-Keyfile
+    volumes:
+      - ./mongo4:/data/db:z
+      - ./mongo-Keyfile:/etc/mongo-Keyfile:z
+    ports:
+      - "27020:27017"
+  mongoCinco:
+    image: mongo
+    container_name: mongoCinco
+    command: mongod --replSet rs1 --bind_ip_all --keyFile /etc/mongo-Keyfile
+    volumes:
+      - ./mongo5:/data/db:z
+      - ./mongo-Keyfile:/etc/mongo-Keyfile:z
+    ports:
+      - "27021:27017"
+  mongoSeis:
+    image: mongo
+    container_name: mongoSeis
+    command: mongod --replSet rs1 --bind_ip_all --keyFile /etc/mongo-Keyfile
+    volumes:
+      - ./mongo6:/data/db:z
+      - ./mongo-Keyfile:/etc/mongo-Keyfile:z
+    ports:
+      - "27022:27017"
