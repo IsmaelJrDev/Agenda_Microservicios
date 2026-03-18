@@ -1,15 +1,76 @@
 services: 
-  mongodb1:
+#  mongodb1:
+#    image: mongo
+#    container_name: mongodb1
+#    volumes:
+#      - ./mongo1:/data/db
+#
+#  mongodb2:
+#    image: mongo
+#    container_name: mongodb2
+#    volumes:
+#      - ./mongo2:/data/db
+
+  # configuración para el primer cluster para el microservicio 1
+
+#s##########################################
+#       CLUSTER DE BASES DE DATOS          #
+############################################
+  mongoUno:
     image: mongo
-    container_name: mongodb1
+    container_name: mongoUno
+    command: mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile
     volumes:
       - ./mongo1:/data/db
-
-  mongodb2:
+      - ./mongo-keyfile:/etc/mongo-keyfile
+    #ports:
+    #  - "27017:27017"
+  mongoDos:
     image: mongo
-    container_name: mongodb2
+    container_name: mongoDos
+    command: mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile
     volumes:
       - ./mongo2:/data/db
+      - ./mongo-keyfile:/etc/mongo-keyfile
+    #ports:
+    #  - "27018:27017"
+  mongoTres:
+    image: mongo
+    container_name: mongoTres
+    command: mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile
+    volumes:
+      - ./mongo3:/data/db
+      - ./mongo-keyfile:/etc/mongo-keyfile
+    #ports:
+    #  - "27019:27017"
+  # configuración para el segundo cluster para el microservicio 2
+  mongoCuatro:
+    image: mongo
+    container_name: mongoCuatro
+    command: mongod --replSet rs1 --bind_ip_all --keyFile /etc/mongo-Keyfile
+    volumes:
+      - ./mongo4:/data/db
+      - ./mongo-Keyfile:/etc/mongo-Keyfile
+    ##ports:
+    ##  - "27020:27017"
+  mongoCinco:
+    image: mongo
+    container_name: mongoCinco
+    command: mongod --replSet rs1 --bind_ip_all --keyFile /etc/mongo-Keyfile
+    volumes:
+      - ./mongo5:/data/db
+      - ./mongo-Keyfile:/etc/mongo-Keyfile
+    #ports:
+    #  - "27021:27017"
+  mongoSeis:
+    image: mongo
+    container_name: mongoSeis
+    command: mongod --replSet rs1 --bind_ip_all --keyFile /etc/mongo-Keyfile
+    volumes:
+      - ./mongo6:/data/db
+      - ./mongo-Keyfile:/etc/mongo-Keyfile
+    #ports:
+    #  - "27022:27017"
 
 ##########################################
 #     ORQUESTACION DE CONTENEDORES       #
@@ -24,7 +85,10 @@ services:
       - ./microservicio_1:/app  # Monta el directorio del microservicio 1 en el contenedor un tipo enlazado
     command: sh -c "npm install && npm start" # Comando para instalar dependencias y arrancar el microservicio 1
     depends_on:
-      - mongodb1 # Asegura que el microservicio 1 se inicie después de que MongoDB esté listo es decir depende de MongoDB
+      # Asegura que el microservicio 1 se inicie después de que MongoDB esté listo es decir depende de MongoDB
+      - mongoUno
+      - mongoDos
+      - mongoTres
     expose:
       - "3000" # Expone el puerto 3000 para el microservicio 1, pero ya no en la computadora, sino solo dentro de la red de Docker, importante para nginx
 
@@ -36,7 +100,9 @@ services:
       - ./microservicio_1:/app
     command: sh -c "npm install && npm start"
     depends_on:
-      - mongodb1
+      - mongoUno
+      - mongoDos
+      - mongoTres
       - microservicio_1
     expose:
       - "3000"
@@ -49,8 +115,10 @@ services:
       - ./microservicio_2:/app  # Monta el directorio del microservicio 2 en el contenedor un tipo enlazado
     command: sh -c "npm install && npm start" # Comando para instalar dependencias y arrancar el microservicio 2
     depends_on:
-      - mongodb2 # Asegura que el microservicio 2 se inicie después de que MongoDB esté listo es decir depende de MongoDB
-      - microservicio_1 # Asegura que el microservicio 2 se inicie después de que el microservicio 1 esté listo es decir depende del microservicio 1
+      - mongoCuatro
+      - mongoCinco
+      - mongoSeis
+      - microservicio_1
     expose:
       - "3000" # Expone el puerto 3000 para el microservicio 2, pero ya no en la computadora, sino solo dentro de la red de Docker, importante para nginx
 
@@ -62,7 +130,9 @@ services:
       - ./microservicio_2:/app
     command: sh -c "npm install && npm start"
     depends_on:
-      - mongodb2
+      - mongoCuatro
+      - mongoCinco
+      - mongoSeis
       - microservicio_2
     expose:
       - "3000"

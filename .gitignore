@@ -11,5 +11,5 @@ microservicio_1/node_modules
 microservicio_2/node_modules
 
 # Archivos de configuracion de KeyFile
-cluster/mongo-keyfile
-cluster/mongo-Keyfile
+mongo-keyfile
+mongo-Keyfile

@@ -12,9 +12,9 @@ app.use(express.json()); // Middleware para parsear el cuerpo de las solicitudes
 app.use("/api/contacts", contactsRoutes); // Usamos las rutas de contactos
 
 // Conexión a la base de datos 
-mongoose.connect("mongodb://mongodb2:27017")
-.then(()=>{
-    app.listen(3000,"0.0.0.0",()=>console.log("Servidor 2 corriendo"));
-}).catch((err)=>{
-    console.log("El servidor 2 no jala :(" + err);
-});
+mongoose.connect("mongodb://admin:040918@mongoCuatro:27017,mongoCinco:27017,mongoSeis:27017")
+    .then(() => {
+        app.listen(3000, "0.0.0.0", () => console.log("Servidor 2 corriendo"));
+    }).catch((err) => {
+        console.log("El servidor 2 no jala :(" + err);
+    });
