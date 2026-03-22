@@ -1,139 +1,181 @@
-# Backend del Sistema de Agenda con Sistemas Distribuidos
+# Sistema de Agenda con Microservicios
 
-Backend del sistema creado en la materia de Sistemas Distribuidos en el 8vo semestre de la carrera de Ingenieria en Sistemas Computacionales.
+Proyecto escolar desarrollado en la materia de **Sistemas Distribuidos** — 8vo semestre, Ingeniería en Sistemas Computacionales.
 
+El objetivo fue aprender a diseñar e implementar una arquitectura de microservicios con bases de datos distribuidas, balanceo de carga y autenticación entre servicios.
 
-## Stack Tecnológico
+---
 
-- **Base de datos:** MongoDB
-- **Microservicios:** Docker
-- **Lenguaje:** JavaScript
-- **Backend:** Node.js
+## Arquitectura
 
-## Herramientas de desarrollo
+![Diagrama de arquitectura](assets/Arquitectura.svg)
 
-- **Visual Studio Code**
-- **Postman**
-- **Linux**
-- **Docker**
+El sistema está compuesto por:
 
-## División de microservicios
+- **Nginx** — API Gateway que recibe todas las peticiones y las distribuye entre los microservicios usando round-robin
+- **Microservicio 1** — Manejo de usuarios: registro y login con JWT
+- **Microservicio 2** — CRUD de contactos de agenda, protegido por el token generado en el Microservicio 1
+- **Cluster MongoDB rs0** — 3 nodos en replica set para el Microservicio 1
+- **Cluster MongoDB rs1** — 3 nodos en replica set para el Microservicio 2
 
-### Microservicio_1
+Cada microservicio corre en 2 réplicas simultáneas, y Nginx distribuye el tráfico entre ellas.
 
-En este microservicio se realiza la parte de logueo, usando `bycrypt`  para poder tener una mejor seguridad con el hasheo de contraseñas, ademas de usar `jwt` para poder crear un token de logueo.
+---
 
-### Microservicio_2
+## Stack tecnológico
 
-En este, una vez ya logueados vamos a poder crear, eliminar, modificar y obtener contactos por medio de la api que se creo, es decir un tipo CRUD. Esto lo podemos proar hacieno uso de **Postman** pasandole el token de logueo por la parte de header
+| Capa | Tecnología |
+|---|---|
+| Lenguaje | JavaScript (Node.js) |
+| Framework | Express 5 |
+| Base de datos | MongoDB 7 (Replica Sets) |
+| ODM | Mongoose |
+| Autenticación | JWT + bcryptjs |
+| API Gateway | Nginx |
+| Contenedores | Docker / Docker Compose |
 
-## API Gateway
+---
 
-Estamos haciendo uso de **Ngnix** para crear la API Gateway, todas estas configuraciones se encuentran en el archivo de ```nginx.conf``` dentro de la carpeta de **nginx**
+## Estructura del proyecto
 
-## Diagrama de Arquitectura del sistema
-
-![Diagram](assets/Arquitectura.svg)
-
-## Clusters
-
-Los clusters de las bases de datos etan declarados en la carpeta cluster, en el archivo de ```docker compose.yaml``` donde se delaran los puertos donde se vana  comunicar mediante la pc del servidor en este caso.
-
-Aqui usamos la imagen de mongo y declaramos un nombre al contenedor para poder identificarlo mas facilmente.
-
-### Congiguracion de llaves KeyFile (necesarias para Cluster)
-
-
-Ejecuta lo siguinete por cluster
-
-```sh
-# Generar la llave de keyfile
-openssl rand -base64 756 >cluster/mongo-keyfile
-
-# Permisos 
-chmod 600 cluster/mongo-keyfile
-
-# Permisos a grupos
-sudo chown 999:999 clsuter/mongo-keyfile
+```
+.
+├── docker-compose.yaml       # Orquestación de todos los servicios
+├── nginx/
+│   └── nginx.conf            # Configuración del API Gateway
+├── microservicio_1/          # Servicio de autenticación
+│   ├── models/User.js
+│   ├── routes/auth.route.js
+│   └── index.js
+└── microservicio_2/          # Servicio de contactos
+    ├── models/Contact.js
+    ├── routes/contacts.routes.js
+    ├── middleware/auth.middleware.js
+    └── index.js
 ```
 
-Levantamos contenedores, una vez levantados vamos a ejecutar el siguiente comando:
-```sh
-docker exec -it mongoUno mongosh
+---
+
+## Cómo levantar el proyecto
+
+### Requisitos previos
+
+- Docker Engine >= 20.10
+- Docker Compose >= 2.0
+
+### 1. Configurar variables de entorno
+
+```bash
+cp .env.example .env
+# Editar .env con tus credenciales
 ```
 
-### Declarar los contenedores para los cluster
+### 2. Generar el keyfile para MongoDB
 
-Primer Cluster para la parte de logueo de usuarios
+Solo es necesario la primera vez:
 
-```sh
+```bash
+openssl rand -base64 756 > mongo-keyfile
+chmod 600 mongo-keyfile
+sudo chown 999:999 mongo-keyfile
+```
+
+> Se necesitan **dos keyfiles** con nombres distintos: `mongo-keyfile` (para rs0) y `mongo-Keyfile` (para rs1). Repetir el comando con el segundo nombre.
+
+### 3. Levantar los contenedores
+
+```bash
+docker-compose up -d
+```
+
+### 4. Inicializar los replica sets
+
+Una sola vez, después de que los contenedores estén corriendo:
+
+```bash
+# Replica set rs0 (Microservicio 1)
+docker exec -it mongoUno mongosh -u admin -p <tu_password>
+```
+
+```js
 rs.initiate({
-     _id: 'rs0', 
-     members: [ 
-        { _id: 0, host: 'mongoUno:27017' }, 
-        { _id: 1, host: 'mongoDos:27017' }, 
-        { _id: 2, host: 'mongoTres:27017' }
-        ] 
-        })
+  _id: 'rs0',
+  members: [
+    { _id: 0, host: 'mongoUno:27017' },
+    { _id: 1, host: 'mongoDos:27017' },
+    { _id: 2, host: 'mongoTres:27017' }
+  ]
+})
 ```
 
-Segundo Cluster para la parte de contactos
+```bash
+# Replica set rs1 (Microservicio 2)
+docker exec -it mongoCuatro mongosh -u admin -p <tu_password>
+```
 
-```sh
+```js
 rs.initiate({
-      _id: 'rs1', 
-      members: [ 
-         { _id: 3, host: 'mongoCuatro:27017' }, 
-         { _id: 4, host: 'mongoCinco:27017' }, 
-         { _id: 5, host: 'mongoSeis:27017' }
-         ] 
-         })
+  _id: 'rs1',
+  members: [
+    { _id: 3, host: 'mongoCuatro:27017' },
+    { _id: 4, host: 'mongoCinco:27017' },
+    { _id: 5, host: 'mongoSeis:27017' }
+  ]
+})
 ```
 
-### Para poder crear un usuario en la base de datos de mongosh 
+### 5. Crear el usuario admin en MongoDB
 
-Para poder ingresar como admin para crear el usuario, primero debemos asegurarnos estar en la replica que se considera primary.
+Dentro de la shell del nodo primario:
 
-Para poder veirificar que estas en la correcta usaremos el comando:
-
-```sh
-rs.status()
-```
-
-Aqui buscaremos en el resultado de la consola, cual es la ```primary```:
-
-Una vez encontrada esta, vamos a ingresar con el sigiuente comando: 
-```sh
-docker exec -it mongoUno mongosh
-```
-
-En esta base de datos es donde ingresamos y creamos el usuario.
-
-```sh
+```js
 use admin
-```
-
-Para poder crear nuetsro usuario, cambia los datos por los que vas a usar.
-
-```sh
 db.createUser({
   user: "admin",
-  pwd: "admin123",
-  roles: [ { role: "root", db: "admin" } ]
+  pwd: "<tu_password>",
+  roles: [{ role: "root", db: "admin" }]
 })
-
 ```
 
-Para poder ingresar con contraseña seria el siguiente comando, necesario para poder hacer la conexion a Mongo Compass:
+---
 
-```sh
-docker exec -it mongoUno mongosh -u admin -p admin123
+## Endpoints disponibles
+
+### Microservicio 1 — Usuarios (`/api1`)
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| POST | `/api1/api/users/register` | Registrar usuario | No |
+| POST | `/api1/api/users/login` | Login, retorna JWT | No |
+
+### Microservicio 2 — Contactos (`/api2`)
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| POST | `/api2/api/contacts` | Crear contacto | Sí |
+| GET | `/api2/api/contacts` | Listar contactos del usuario | Sí |
+| PUT | `/api2/api/contacts/update/:id` | Actualizar contacto | Sí |
+| DELETE | `/api2/api/contacts/delete/:id` | Eliminar contacto | Sí |
+
+Para las rutas protegidas, incluir el header:
+```
+Authorization: Bearer <token>
 ```
 
-### Para poder netrar a mongo Compass
+---
 
-```
-mongodb://admin:040918@localhost:27018
-```
+## Aprendizajes
 
-Ya con esto podemos tener el cluster, es decir si en la base de datos principal hay cambios, se pueden mostrar en las replicas es decir si en la ```mongoUno``` hay cambios, la ```mongoDos``` y en la ```mongoTres```, lo mismo para el segundo cluster ```mongoCuatro``` hay cambios, la ```mongoCinco``` y en la ```mongoSeis``` se reflejaran.
+- Diseño e implementación de una arquitectura de microservicios con responsabilidades separadas
+- Configuración de replica sets en MongoDB con autenticación mediante keyfiles
+- Uso de Nginx como API Gateway con load balancing round-robin
+- Comunicación entre microservicios mediante JWT para proteger rutas sin acoplamiento directo
+- Orquestación de múltiples servicios con Docker Compose
+
+---
+
+## Notas
+
+Este proyecto fue desarrollado con fines educativos. Para un entorno de producción habría que considerar: manejo de errores robusto, variables de entorno para todos los secretos, inicialización automática de los replica sets e imágenes Docker optimizadas.
+
+Ver [`MEJORAS.md`](MEJORAS.md) para el detalle técnico de lo que se mejoraría.
